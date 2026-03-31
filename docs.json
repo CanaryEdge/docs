@@ -9,64 +9,54 @@
   },
   "favicon": "/favicon.svg",
   "navigation": {
-    "tabs": [
+    "groups": [
       {
-        "tab": "Documentation",
-        "groups": [
-          {
-            "group": "Getting Started",
-            "pages": [
-              "index",
-              "quickstart",
-              "concepts"
-            ]
-          },
-          {
-            "group": "Guides",
-            "pages": [
-              "guides/data-upload",
-              "guides/azure-migration",
-              "guides/aws-migration",
-              "guides/fine-tuning",
-              "guides/webhooks"
-            ]
-          }
+        "group": "Getting Started",
+        "pages": [
+          "index",
+          "quickstart",
+          "concepts"
         ]
       },
       {
-        "tab": "API Reference",
-        "groups": [
-          {
-            "group": "Overview",
-            "pages": [
-              "api-reference/introduction",
-              "api-reference/authentication"
-            ]
-          },
-          {
-            "group": "Azure-Compatible",
-            "pages": [
-              "api-reference/endpoint/detect",
-              "api-reference/endpoint/detect-last",
-              "api-reference/endpoint/detect-changepoint"
-            ]
-          },
-          {
-            "group": "Native API",
-            "pages": [
-              "api-reference/endpoint/native-detect",
-              "api-reference/endpoint/baseline",
-              "api-reference/endpoint/status",
-              "api-reference/endpoint/machines",
-              "api-reference/endpoint/usage"
-            ]
-          },
-          {
-            "group": "System",
-            "pages": [
-              "api-reference/endpoint/health"
-            ]
-          }
+        "group": "Guides",
+        "pages": [
+          "guides/data-upload",
+          "guides/azure-migration",
+          "guides/aws-migration",
+          "guides/fine-tuning",
+          "guides/webhooks"
+        ]
+      },
+      {
+        "group": "API Reference",
+        "pages": [
+          "api-reference/introduction",
+          "api-reference/authentication"
+        ]
+      },
+      {
+        "group": "Azure-Compatible Endpoints",
+        "pages": [
+          "api-reference/endpoint/detect",
+          "api-reference/endpoint/detect-last",
+          "api-reference/endpoint/detect-changepoint"
+        ]
+      },
+      {
+        "group": "Native Endpoints",
+        "pages": [
+          "api-reference/endpoint/native-detect",
+          "api-reference/endpoint/baseline",
+          "api-reference/endpoint/status",
+          "api-reference/endpoint/machines",
+          "api-reference/endpoint/usage"
+        ]
+      },
+      {
+        "group": "System",
+        "pages": [
+          "api-reference/endpoint/health"
         ]
       }
     ],
