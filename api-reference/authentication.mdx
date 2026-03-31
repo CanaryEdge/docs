@@ -1,0 +1,45 @@
+---
+title: "Authentication"
+description: "How to authenticate with the Canary Edge API"
+---
+
+## API Key
+
+Every request to detection and management endpoints requires an API key. Canary accepts three header formats, checked in this order:
+
+| Header | Format | Notes |
+|--------|--------|-------|
+| `Ocp-Apim-Subscription-Key` | `cnry_live_xxx` | Azure-compatible header name |
+| `X-Canary-Key` | `cnry_live_xxx` | Canary native header |
+| `Authorization` | `Bearer cnry_live_xxx` | Standard Bearer token |
+
+```bash
+curl https://api.canaryedge.com/anomalydetector/v1.1/timeseries/entire/detect \
+  -H "Ocp-Apim-Subscription-Key: cnry_live_abc123..."
+```
+
+The Azure Python SDK (`azure-ai-anomalydetector`) and .NET SDK (`Azure.AI.AnomalyDetector`) send the `Ocp-Apim-Subscription-Key` header automatically when constructed with `AzureKeyCredential`. Canary keys pass SDK validation because the SDK only checks that the key is a non-empty string.
+
+### Key Types
+
+| Key Type | Prefix | Use Case |
+|----------|--------|----------|
+| Live | `cnry_live_` | Production API calls |
+| Test | `cnry_test_` | Development and testing (no billing) |
+
+Generate and manage keys in your [dashboard](https://canaryedge.com/dashboard/api-keys).
+
+### Key Scope
+
+API keys are scoped to an organization. All baselines, usage records, and machine data are isolated by organization ID.
+
+## JWT Authentication
+
+Dashboard-authenticated users can also use Clerk JWT tokens:
+
+```bash
+curl https://api.canaryedge.com/v1/detect \
+  -H "Authorization: Bearer eyJhbGciOiJSUzI1NiIs..."
+```
+
+This is used internally by the Canary Edge dashboard.

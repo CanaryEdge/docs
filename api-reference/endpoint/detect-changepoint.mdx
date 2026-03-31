@@ -1,0 +1,87 @@
+---
+title: "Detect Changepoints"
+description: "Azure-compatible endpoint to detect distribution changes in a time series"
+---
+
+Detect points where the underlying data distribution changes. Canary implements this by computing the energy gradient: the rate of change of the prediction error over a sliding window. This endpoint is fully compatible with the Azure Anomaly Detector changepoint API.
+
+Both `/anomalydetector/v1.0/timeseries/changepoint/detect` and `/anomalydetector/v1.1/timeseries/changepoint/detect` are supported.
+
+<ParamField body="series" type="array" required>
+  Array of data points, each with `timestamp` (ISO 8601) and `value` (number). Minimum 12 points, maximum 8640 points. Timestamps must be sorted ascending with no duplicates.
+</ParamField>
+
+<ParamField body="granularity" type="string" default="none">
+  Time interval between points. One of: `yearly`, `monthly`, `weekly`, `daily`, `hourly`, `minutely`, `secondly`, `microsecond`, `none`.
+</ParamField>
+
+<ParamField body="customInterval" type="integer" default={1}>
+  Multiplier for granularity.
+</ParamField>
+
+<ParamField body="period" type="integer" default={0}>
+  Seasonality period. Set to `0` for auto-detection.
+</ParamField>
+
+<ParamField body="maxAnomalyRatio" type="number" default={0.25}>
+  Maximum fraction of points flagged. Must be between 0 and 0.5 (exclusive).
+</ParamField>
+
+<ParamField body="sensitivity" type="integer" default={95}>
+  Detection sensitivity (0-99).
+</ParamField>
+
+<ResponseField name="period" type="integer">
+  Detected seasonality period.
+</ResponseField>
+
+<ResponseField name="isChangePoint" type="boolean[]">
+  Whether each point is a changepoint.
+</ResponseField>
+
+<ResponseField name="confidenceScores" type="number[]">
+  Confidence score from 0.0 to 1.0 for each point.
+</ResponseField>
+
+### How Changepoint Detection Works
+
+1. The energy gradient is computed: `gradient[i] = mean(energies[i:i+k]) - mean(energies[i-k:i])` where `k = max(period, 5)`.
+2. A point is a changepoint if its gradient exceeds the 95th percentile of all gradients.
+3. The gradient must be a local maximum (greater than or equal to both neighbors).
+4. Minimum spacing between changepoints equals the detected period.
+
+<RequestExample>
+```bash cURL
+curl -X POST https://api.canaryedge.com/anomalydetector/v1.1/timeseries/changepoint/detect \
+  -H "Content-Type: application/json" \
+  -H "Ocp-Apim-Subscription-Key: YOUR_API_KEY" \
+  -d '{
+    "series": [
+      {"timestamp": "2018-03-01T00:00:00Z", "value": 32858923},
+      {"timestamp": "2018-03-02T00:00:00Z", "value": 29615278},
+      {"timestamp": "2018-03-03T00:00:00Z", "value": 28988966},
+      {"timestamp": "2018-03-04T00:00:00Z", "value": 28943783},
+      {"timestamp": "2018-03-05T00:00:00Z", "value": 33521547},
+      {"timestamp": "2018-03-06T00:00:00Z", "value": 34127843},
+      {"timestamp": "2018-03-07T00:00:00Z", "value": 32497298},
+      {"timestamp": "2018-03-08T00:00:00Z", "value": 29615278},
+      {"timestamp": "2018-03-09T00:00:00Z", "value": 28988966},
+      {"timestamp": "2018-03-10T00:00:00Z", "value": 28943783},
+      {"timestamp": "2018-03-11T00:00:00Z", "value": 33521547},
+      {"timestamp": "2018-03-12T00:00:00Z", "value": 72000000}
+    ],
+    "granularity": "daily",
+    "sensitivity": 95
+  }'
+```
+</RequestExample>
+
+<ResponseExample>
+```json 200
+{
+  "period": 7,
+  "isChangePoint": [false, false, false, false, false, false, false, false, false, false, false, true],
+  "confidenceScores": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.87]
+}
+```
+</ResponseExample>

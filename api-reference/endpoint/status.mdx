@@ -1,0 +1,61 @@
+---
+title: "Machine Status"
+description: "Retrieve current status and baseline info for a monitored machine"
+---
+
+Returns the current operational status and baseline information for a specific machine. Requires that a baseline has been created for the machine via `POST /v1/baseline`.
+
+<ParamField path="machine_id" type="string" required>
+  The machine identifier to query.
+</ParamField>
+
+<ResponseField name="machine_id" type="string">
+  The machine identifier.
+</ResponseField>
+
+<ResponseField name="regime" type="string">
+  Current regime: `HEALTHY`, `ACTIVE`, `TRANSITION`, or `SHOCK`.
+</ResponseField>
+
+<ResponseField name="last_energy" type="number">
+  Most recent energy score.
+</ResponseField>
+
+<ResponseField name="last_z_score" type="number">
+  Most recent z-score relative to baseline.
+</ResponseField>
+
+<ResponseField name="baseline_id" type="string">
+  Associated baseline identifier.
+</ResponseField>
+
+<ResponseField name="alert_active" type="boolean">
+  Whether an alert is currently active for this machine.
+</ResponseField>
+
+<RequestExample>
+```bash cURL
+curl https://api.canaryedge.com/v1/status/pump-47 \
+  -H "X-Canary-Key: YOUR_API_KEY"
+```
+</RequestExample>
+
+<ResponseExample>
+```json 200
+{
+  "machine_id": "pump-47",
+  "regime": "HEALTHY",
+  "last_energy": 0.034,
+  "last_z_score": 0.42,
+  "baseline_id": "bl_pump-47",
+  "alert_active": false
+}
+```
+
+```json 404
+{
+  "code": "NotFound",
+  "message": "No baseline for machine 'pump-47'"
+}
+```
+</ResponseExample>
