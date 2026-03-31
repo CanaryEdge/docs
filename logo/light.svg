@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#0F2035"/>
+      <stop offset="100%" stop-color="#0A1628"/>
+    </radialGradient>
+    <linearGradient id="bodyGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FFD966"/>
+      <stop offset="50%" stop-color="#F5C542"/>
+      <stop offset="100%" stop-color="#E0A820"/>
+    </linearGradient>
+    <linearGradient id="wingGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#FFE588"/>
+      <stop offset="100%" stop-color="#F5C542"/>
+    </linearGradient>
+    <linearGradient id="tailGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#F5C542"/>
+      <stop offset="100%" stop-color="#E0A820"/>
+    </linearGradient>
+  </defs>
+  <!-- Background circle -->
+  <circle cx="256" cy="256" r="256" fill="url(#bg)"/>
+  <!-- Body -->
+  <ellipse cx="260" cy="280" rx="72" ry="90" fill="url(#bodyGrad)"/>
+  <!-- Head -->
+  <circle cx="268" cy="195" r="58" fill="#FFD966"/>
+  <!-- Eye -->
+  <circle cx="288" cy="185" r="12" fill="#0A1628"/>
+  <circle cx="292" cy="181" r="4" fill="#FFFFFF"/>
+  <!-- Beak -->
+  <polygon points="326,195 355,200 326,210" fill="#E07830"/>
+  <polygon points="326,200 350,205 326,210" fill="#C06020"/>
+  <!-- Wing -->
+  <path d="M195,260 Q160,220 175,170 Q200,200 220,230 Q230,250 210,280 Z" fill="url(#wingGrad)" opacity="0.9"/>
+  <!-- Tail feathers -->
+  <path d="M200,340 Q150,330 130,300" stroke="url(#tailGrad)" stroke-width="8" fill="none" stroke-linecap="round"/>
+  <path d="M195,350 Q140,350 115,325" stroke="#E0A820" stroke-width="6" fill="none" stroke-linecap="round"/>
+  <path d="M200,355 Q155,365 125,350" stroke="#D09A18" stroke-width="5" fill="none" stroke-linecap="round"/>
+  <!-- Legs -->
+  <line x1="240" y1="365" x2="235" y2="405" stroke="#E07830" stroke-width="5" stroke-linecap="round"/>
+  <line x1="280" y1="365" x2="285" y2="405" stroke="#E07830" stroke-width="5" stroke-linecap="round"/>
+  <!-- Feet -->
+  <path d="M220,405 L235,405 L245,405" stroke="#E07830" stroke-width="4" fill="none" stroke-linecap="round"/>
+  <path d="M270,405 L285,405 L295,405" stroke="#E07830" stroke-width="4" fill="none" stroke-linecap="round"/>
+  <!-- Chest highlight -->
+  <ellipse cx="265" cy="265" rx="40" ry="50" fill="#FFE588" opacity="0.4"/>
+  <!-- Subtle signal wave (anomaly detection nod) -->
+  <path d="M370,140 Q385,120 395,140 Q405,160 415,140 Q425,120 440,140" stroke="#F5C542" stroke-width="3" fill="none" opacity="0.6" stroke-linecap="round"/>
+  <path d="M375,160 Q388,145 396,160 Q404,175 414,160 Q424,145 435,160" stroke="#F5C542" stroke-width="2" fill="none" opacity="0.4" stroke-linecap="round"/>
+</svg>

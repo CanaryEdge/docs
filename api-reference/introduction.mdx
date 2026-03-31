@@ -1,0 +1,60 @@
+---
+title: "API Reference"
+description: "Canary Edge REST API documentation"
+---
+
+## Base URL
+
+```
+https://api.canaryedge.com
+```
+
+## Authentication
+
+All requests require an API key passed via the `Ocp-Apim-Subscription-Key` header:
+
+```bash
+curl https://api.canaryedge.com/v1/health \
+  -H "Ocp-Apim-Subscription-Key: YOUR_API_KEY"
+```
+
+Canary Edge also supports Clerk JWT tokens via the `Authorization: Bearer` header for dashboard-authenticated requests.
+
+See [Authentication](/api-reference/authentication) for details.
+
+## Rate Limits
+
+| Plan | Rate Limit |
+|---|---|
+| Free | 10 req/min |
+| Pro | 100 req/s per org |
+| Enterprise | Custom |
+
+Rate limit headers are included in every response:
+
+```
+X-RateLimit-Limit: 100
+X-RateLimit-Remaining: 97
+X-RateLimit-Reset: 1711900800
+```
+
+## Errors
+
+Standard HTTP status codes with JSON error bodies:
+
+```json
+{
+  "error": {
+    "code": "InvalidSeries",
+    "message": "Series must contain at least 12 data points"
+  }
+}
+```
+
+| Status | Meaning |
+|---|---|
+| 200 | Success |
+| 400 | Invalid request (bad series data, missing fields) |
+| 401 | Invalid or missing API key |
+| 429 | Rate limit exceeded |
+| 500 | Internal server error |

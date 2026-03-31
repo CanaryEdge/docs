@@ -1,0 +1,60 @@
+---
+title: "Fine-Tuning"
+description: "Train per-machine models for better accuracy"
+---
+
+Canary Edge ships with a generic model that works out of the box. For production workloads, fine-tuning a per-machine predictor improves accuracy by learning the specific patterns of your equipment or metrics.
+
+## When to Fine-Tune
+
+- Your time series has unique seasonal patterns
+- The generic model produces too many false positives
+- You need maximum sensitivity for critical equipment
+
+## How It Works
+
+1. Send normal operating data for a specific machine via `/v1/train`
+2. Canary Edge trains a lightweight predictor (~462K params) in seconds
+3. Future `/v1/timeseries/*/detect` calls with that `machine_id` use the fine-tuned model automatically
+
+## Training Request
+
+```bash
+curl -X POST https://api.canaryedge.com/v1/train \
+  -H "Content-Type: application/json" \
+  -H "Ocp-Apim-Subscription-Key: YOUR_API_KEY" \
+  -d '{
+    "machine_id": "pump-assembly-1",
+    "series": [
+      {"timestamp": "2026-01-01T00:00:00Z", "value": 10.5},
+      {"timestamp": "2026-01-01T01:00:00Z", "value": 11.2},
+      ...
+    ]
+  }'
+```
+
+<Warning>
+  Only send **normal operating data** for training. Including anomalous data will degrade detection accuracy.
+</Warning>
+
+## Requirements
+
+- Minimum 100 data points for training
+- Data should represent at least one full operational cycle
+- All data points should be from normal operation (no known anomalies)
+
+## Managing Models
+
+List your trained models:
+
+```bash
+curl https://api.canaryedge.com/v1/models \
+  -H "Ocp-Apim-Subscription-Key: YOUR_API_KEY"
+```
+
+Delete a model to revert to the generic detector:
+
+```bash
+curl -X DELETE https://api.canaryedge.com/v1/models/pump-assembly-1 \
+  -H "Ocp-Apim-Subscription-Key: YOUR_API_KEY"
+```

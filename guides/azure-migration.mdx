@@ -1,0 +1,66 @@
+---
+title: "Migrate from Azure Anomaly Detector"
+description: "Switch from Azure AD to Canary Edge with minimal code changes"
+---
+
+Azure Anomaly Detector retires **October 1, 2026**. Canary Edge is API-compatible — in most cases, you only need to change the endpoint URL and authentication header.
+
+## Step 1: Get Your Canary Edge API Key
+
+Sign up at [canaryedge.com](https://canaryedge.com) and generate an API key from the dashboard.
+
+## Step 2: Update Your Endpoint
+
+Replace the Azure endpoint with Canary Edge:
+
+```diff
+- https://{your-resource}.cognitiveservices.azure.com/anomalydetector/v1.0/timeseries/entire/detect
++ https://api.canaryedge.com/v1/timeseries/entire/detect
+```
+
+## Step 3: Update Authentication
+
+Canary Edge accepts the same `Ocp-Apim-Subscription-Key` header that Azure uses:
+
+```diff
+  headers = {
+      "Content-Type": "application/json",
+-     "Ocp-Apim-Subscription-Key": "YOUR_AZURE_KEY",
++     "Ocp-Apim-Subscription-Key": "YOUR_CANARY_EDGE_KEY",
+  }
+```
+
+## Step 4: Verify
+
+Send the same request you were sending to Azure. The response format is identical:
+
+```json
+{
+  "isAnomaly": [false, false, true, false],
+  "isPositiveAnomaly": [false, false, true, false],
+  "isNegativeAnomaly": [false, false, false, false],
+  "expectedValues": [10.5, 10.8, 10.6, 10.7],
+  "upperMargins": [2.1, 2.16, 2.12, 2.14],
+  "lowerMargins": [2.1, 2.16, 2.12, 2.14],
+  "period": 0
+}
+```
+
+## Endpoint Mapping
+
+| Azure Endpoint | Canary Edge Endpoint |
+|---|---|
+| `/timeseries/entire/detect` | `/v1/timeseries/entire/detect` |
+| `/timeseries/last/detect` | `/v1/timeseries/last/detect` |
+| `/timeseries/changepoint/detect` | `/v1/timeseries/changepoint/detect` |
+
+## What's Different
+
+- **Better accuracy** — LeWM catches anomalies that threshold-based methods miss
+- **No resource provisioning** — No Azure resource groups, no Cognitive Services setup
+- **Per-machine fine-tuning** — Optional model customization via `/v1/train`
+- **Transparent pricing** — Pay per API call via Stripe, no Azure commitment required
+
+## Need Help?
+
+Contact [support@canaryedge.com](mailto:support@canaryedge.com) for migration assistance.

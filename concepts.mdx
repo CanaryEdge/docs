@@ -1,0 +1,46 @@
+---
+title: "Core Concepts"
+description: "How Canary Edge detects anomalies differently"
+---
+
+## Learned World Model (LeWM)
+
+Traditional anomaly detectors fit statistical thresholds to historical data. Canary Edge uses a **Learned World Model** — a neural network that learns the normal dynamics of your time series and flags deviations from predicted behavior.
+
+### How It Works
+
+1. **Encode** — Consecutive time windows are converted into latent-space embeddings using a Temporal Transformer Encoder
+2. **Predict** — A predictor network estimates the next-state embedding from the current state
+3. **Measure** — The prediction error (energy) between expected and actual embeddings determines anomaly likelihood
+4. **Classify** — High energy indicates the system entered an unexpected state — an anomaly
+
+### Why This Matters
+
+| Statistical Methods | Canary Edge (LeWM) |
+|---|---|
+| Fixed thresholds that need manual tuning | Learns what "normal" looks like automatically |
+| Misses gradual regime shifts | Detects subtle behavioral changes |
+| Requires large training datasets | Works with minimal data (12+ points) |
+| One model per metric | Understands cross-metric relationships |
+
+## SIGReg Collapse Prevention
+
+Neural models can "collapse" — mapping all inputs to the same output, making everything look normal. Canary Edge uses **SIGReg** (Signature Regularization) to prevent this, ensuring the latent space remains expressive and anomalies stay detectable.
+
+## Sensitivity
+
+The `sensitivity` parameter (0-99) controls detection strictness:
+
+- **Low (0-30):** Only flag extreme deviations. Good for noisy industrial sensors.
+- **Medium (40-70):** Balanced detection. Default for most use cases.
+- **High (71-99):** Catch subtle shifts. Good for financial metrics and SLAs.
+
+## Fine-Tuning
+
+Canary Edge ships with a generic model trained on diverse time-series patterns. For better accuracy on your specific data, you can fine-tune a per-machine predictor:
+
+1. Send labeled historical data via the `/v1/train` endpoint
+2. The fine-tuned model is stored and automatically used for future detection on that machine
+3. Fine-tuning takes seconds, not hours
+
+See the [Fine-Tuning Guide](/guides/fine-tuning) for details.

@@ -1,0 +1,59 @@
+---
+title: "Webhooks"
+description: "Get notified when anomalies are detected"
+---
+
+Configure webhooks to receive real-time notifications when Canary Edge detects anomalies during continuous monitoring.
+
+## Setup
+
+Register a webhook endpoint in your dashboard at [canaryedge.com/dashboard/webhooks](https://canaryedge.com/dashboard/webhooks), or via the API:
+
+```bash
+curl -X POST https://api.canaryedge.com/v1/webhooks \
+  -H "Content-Type: application/json" \
+  -H "Ocp-Apim-Subscription-Key: YOUR_API_KEY" \
+  -d '{
+    "url": "https://your-app.com/webhooks/canary",
+    "events": ["anomaly.detected"],
+    "secret": "your-webhook-secret"
+  }'
+```
+
+## Payload
+
+When an anomaly is detected, Canary Edge sends a POST request to your endpoint:
+
+```json
+{
+  "event": "anomaly.detected",
+  "timestamp": "2026-03-15T14:30:00Z",
+  "data": {
+    "machine_id": "pump-assembly-1",
+    "point_timestamp": "2026-03-15T14:30:00Z",
+    "value": 45.2,
+    "expected_value": 10.8,
+    "upper_margin": 2.16,
+    "severity": "high"
+  }
+}
+```
+
+## Verification
+
+Verify webhook authenticity using the HMAC-SHA256 signature in the `X-Canary-Signature` header:
+
+```python
+import hmac
+import hashlib
+
+def verify_webhook(payload: bytes, signature: str, secret: str) -> bool:
+    expected = hmac.new(
+        secret.encode(), payload, hashlib.sha256
+    ).hexdigest()
+    return hmac.compare_digest(f"sha256={expected}", signature)
+```
+
+## Retry Policy
+
+Failed deliveries are retried with exponential backoff: 1min, 5min, 30min, 2hr. After 4 failures, the webhook is disabled and you're notified via email.

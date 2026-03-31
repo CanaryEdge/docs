@@ -1,0 +1,37 @@
+---
+title: "Authentication"
+description: "How to authenticate with the Canary Edge API"
+---
+
+## API Key
+
+The primary authentication method. Pass your key in the `Ocp-Apim-Subscription-Key` header:
+
+```bash
+curl https://api.canaryedge.com/v1/timeseries/entire/detect \
+  -H "Ocp-Apim-Subscription-Key: ce_live_abc123..."
+```
+
+### Key Types
+
+| Key Type | Prefix | Use Case |
+|---|---|---|
+| Live | `ce_live_` | Production API calls |
+| Test | `ce_test_` | Development and testing (no billing) |
+
+Generate and manage keys in your [dashboard](https://canaryedge.com/dashboard/api-keys).
+
+## Azure-Compatible Header
+
+For seamless migration, Canary Edge accepts the same header name Azure Anomaly Detector uses. No code changes needed — just swap the key value.
+
+## JWT Authentication
+
+Dashboard-authenticated users can also use Clerk JWT tokens:
+
+```bash
+curl https://api.canaryedge.com/v1/timeseries/entire/detect \
+  -H "Authorization: Bearer eyJhbGciOiJSUzI1NiIs..."
+```
+
+This is used internally by the Canary Edge dashboard and SDKs.

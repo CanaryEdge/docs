@@ -1,0 +1,83 @@
+---
+title: "Detect Anomalies (Entire Series)"
+api: "POST /v1/timeseries/entire/detect"
+description: "Analyze an entire time series for anomalies"
+---
+
+Detects anomalies across all points in a time series. Best for batch analysis of historical data.
+
+<ParamField body="series" type="array" required>
+  Array of data points, each with `timestamp` (ISO 8601) and `value` (number). Minimum 12 points.
+</ParamField>
+
+<ParamField body="granularity" type="string" required>
+  Time interval between points. One of: `minutely`, `hourly`, `daily`, `weekly`, `monthly`.
+</ParamField>
+
+<ParamField body="sensitivity" type="integer" default="85">
+  Detection sensitivity from 0 (least sensitive) to 99 (most sensitive).
+</ParamField>
+
+<ParamField body="machine_id" type="string">
+  Optional machine identifier. If a fine-tuned model exists for this ID, it will be used automatically.
+</ParamField>
+
+<ResponseField name="isAnomaly" type="boolean[]">
+  Whether each point is an anomaly.
+</ResponseField>
+
+<ResponseField name="isPositiveAnomaly" type="boolean[]">
+  Whether each point is a positive (above expected) anomaly.
+</ResponseField>
+
+<ResponseField name="isNegativeAnomaly" type="boolean[]">
+  Whether each point is a negative (below expected) anomaly.
+</ResponseField>
+
+<ResponseField name="expectedValues" type="number[]">
+  The model's expected value for each point.
+</ResponseField>
+
+<ResponseField name="upperMargins" type="number[]">
+  Upper bound margin for each point.
+</ResponseField>
+
+<ResponseField name="lowerMargins" type="number[]">
+  Lower bound margin for each point.
+</ResponseField>
+
+<ResponseField name="period" type="integer">
+  Detected seasonality period (0 if none detected).
+</ResponseField>
+
+<RequestExample>
+```bash cURL
+curl -X POST https://api.canaryedge.com/v1/timeseries/entire/detect \
+  -H "Content-Type: application/json" \
+  -H "Ocp-Apim-Subscription-Key: YOUR_API_KEY" \
+  -d '{
+    "series": [
+      {"timestamp": "2026-01-01T00:00:00Z", "value": 10.5},
+      {"timestamp": "2026-01-01T01:00:00Z", "value": 11.2},
+      {"timestamp": "2026-01-01T02:00:00Z", "value": 45.0},
+      {"timestamp": "2026-01-01T03:00:00Z", "value": 10.1}
+    ],
+    "granularity": "hourly",
+    "sensitivity": 85
+  }'
+```
+</RequestExample>
+
+<ResponseExample>
+```json 200
+{
+  "isAnomaly": [false, false, true, false],
+  "isPositiveAnomaly": [false, false, true, false],
+  "isNegativeAnomaly": [false, false, false, false],
+  "expectedValues": [10.5, 10.85, 10.67, 10.55],
+  "upperMargins": [2.1, 2.17, 2.13, 2.11],
+  "lowerMargins": [2.1, 2.17, 2.13, 2.11],
+  "period": 0
+}
+```
+</ResponseExample>

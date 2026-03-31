@@ -1,0 +1,56 @@
+---
+title: "Detect Anomalies (Batch)"
+api: "POST /v1/timeseries/batch/detect"
+description: "Detect anomalies across multiple time series in a single request"
+---
+
+Submit multiple time series for parallel anomaly detection. Useful for monitoring multiple sensors or metrics simultaneously.
+
+<ParamField body="requests" type="array" required>
+  Array of detection requests, each containing `series`, `granularity`, and optional `sensitivity` and `machine_id`.
+</ParamField>
+
+<ResponseField name="results" type="array">
+  Array of detection results, one per input request. Same format as the single detect endpoint.
+</ResponseField>
+
+<RequestExample>
+```bash cURL
+curl -X POST https://api.canaryedge.com/v1/timeseries/batch/detect \
+  -H "Content-Type: application/json" \
+  -H "Ocp-Apim-Subscription-Key: YOUR_API_KEY" \
+  -d '{
+    "requests": [
+      {
+        "machine_id": "pump-1",
+        "series": [...],
+        "granularity": "minutely"
+      },
+      {
+        "machine_id": "pump-2",
+        "series": [...],
+        "granularity": "minutely"
+      }
+    ]
+  }'
+```
+</RequestExample>
+
+<ResponseExample>
+```json 200
+{
+  "results": [
+    {
+      "machine_id": "pump-1",
+      "isAnomaly": [false, false, true],
+      "expectedValues": [10.5, 10.8, 10.6]
+    },
+    {
+      "machine_id": "pump-2",
+      "isAnomaly": [false, false, false],
+      "expectedValues": [22.1, 22.3, 22.0]
+    }
+  ]
+}
+```
+</ResponseExample>

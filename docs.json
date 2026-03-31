@@ -1,0 +1,124 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "theme": "quill",
+  "name": "Canary Edge",
+  "colors": {
+    "primary": "#F5C542",
+    "light": "#FFE588",
+    "dark": "#0F2035",
+    "background": {
+      "dark": "#0A1628"
+    }
+  },
+  "favicon": "/favicon.svg",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Getting Started",
+            "pages": [
+              "index",
+              "quickstart",
+              "concepts"
+            ]
+          },
+          {
+            "group": "Migration Guides",
+            "pages": [
+              "guides/azure-migration",
+              "guides/aws-migration"
+            ]
+          },
+          {
+            "group": "Advanced",
+            "pages": [
+              "guides/fine-tuning",
+              "guides/webhooks"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "API Reference",
+        "groups": [
+          {
+            "group": "Overview",
+            "pages": [
+              "api-reference/introduction",
+              "api-reference/authentication"
+            ]
+          },
+          {
+            "group": "Anomaly Detection",
+            "pages": [
+              "api-reference/endpoint/detect",
+              "api-reference/endpoint/detect-batch",
+              "api-reference/endpoint/detect-last"
+            ]
+          },
+          {
+            "group": "Models",
+            "pages": [
+              "api-reference/endpoint/train",
+              "api-reference/endpoint/models"
+            ]
+          }
+        ]
+      }
+    ],
+    "global": {
+      "anchors": [
+        {
+          "anchor": "API Status",
+          "href": "https://status.canaryedge.com",
+          "icon": "signal"
+        },
+        {
+          "anchor": "GitHub",
+          "href": "https://github.com/CanaryEdge",
+          "icon": "github"
+        }
+      ]
+    }
+  },
+  "logo": {
+    "light": "/logo/light.svg",
+    "dark": "/logo/dark.svg"
+  },
+  "navbar": {
+    "links": [
+      {
+        "label": "Support",
+        "href": "mailto:support@canaryedge.com"
+      }
+    ],
+    "primary": {
+      "type": "button",
+      "label": "Dashboard",
+      "href": "https://canaryedge.com/dashboard"
+    }
+  },
+  "contextual": {
+    "options": [
+      "copy",
+      "view",
+      "chatgpt",
+      "claude",
+      "cursor"
+    ]
+  },
+  "footer": {
+    "socials": {
+      "github": "https://github.com/CanaryEdge",
+      "linkedin": "https://linkedin.com/company/canaryedge"
+    }
+  },
+  "api": {
+    "baseUrl": "https://api.canaryedge.com"
+  },
+  "feedback": {
+    "thumbsRating": true
+  }
+}

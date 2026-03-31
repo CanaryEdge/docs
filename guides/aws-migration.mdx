@@ -1,0 +1,78 @@
+---
+title: "Migrate from AWS Lookout for Equipment"
+description: "Move from AWS Lookout to Canary Edge"
+---
+
+AWS Lookout for Equipment retires **October 7, 2026**. Canary Edge handles the same industrial time-series anomaly detection workloads with a simpler API.
+
+## Key Differences
+
+| AWS Lookout | Canary Edge |
+|---|---|
+| Requires model training before detection | Works immediately with generic model |
+| S3 bucket for data ingestion | Direct API call with JSON payload |
+| Async inference scheduling | Synchronous real-time detection |
+| AWS-only deployment | Cloud-agnostic API |
+
+## Migration Steps
+
+### 1. Export Your Data
+
+Export your sensor data from S3 into timestamp/value pairs:
+
+```python
+import boto3
+import json
+
+s3 = boto3.client("s3")
+obj = s3.get_object(Bucket="your-bucket", Key="sensor-data/pump-1.csv")
+# Convert to Canary Edge format
+```
+
+### 2. Call the Canary Edge API
+
+```python
+import requests
+
+series = [
+    {"timestamp": "2026-01-01T00:00:00Z", "value": reading}
+    for reading in your_sensor_readings
+]
+
+response = requests.post(
+    "https://api.canaryedge.com/v1/timeseries/entire/detect",
+    headers={
+        "Content-Type": "application/json",
+        "Ocp-Apim-Subscription-Key": "YOUR_API_KEY",
+    },
+    json={
+        "series": series,
+        "granularity": "minutely",
+        "sensitivity": 75,
+    },
+)
+```
+
+### 3. Optional: Fine-Tune for Your Equipment
+
+For equipment-specific accuracy, fine-tune a model with historical normal data:
+
+```python
+requests.post(
+    "https://api.canaryedge.com/v1/train",
+    headers={
+        "Content-Type": "application/json",
+        "Ocp-Apim-Subscription-Key": "YOUR_API_KEY",
+    },
+    json={
+        "machine_id": "pump-1",
+        "series": normal_operation_data,
+    },
+)
+```
+
+Future detection calls for `pump-1` will automatically use the fine-tuned model.
+
+## Need Help?
+
+Contact [support@canaryedge.com](mailto:support@canaryedge.com) for migration assistance.

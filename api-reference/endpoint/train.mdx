@@ -1,0 +1,56 @@
+---
+title: "Train Model"
+api: "POST /v1/train"
+description: "Fine-tune a per-machine anomaly detection model"
+---
+
+Train a fine-tuned predictor for a specific machine or metric. The model learns normal patterns from your data and provides more accurate detection.
+
+<ParamField body="machine_id" type="string" required>
+  Unique identifier for the machine or metric being modeled.
+</ParamField>
+
+<ParamField body="series" type="array" required>
+  Array of **normal operating** data points. Minimum 100 points. Do not include known anomalies.
+</ParamField>
+
+<ResponseField name="machine_id" type="string">
+  The machine ID the model was trained for.
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  Training result: `success` or `error`.
+</ResponseField>
+
+<ResponseField name="metrics" type="object">
+  Training metrics including loss and epoch count.
+</ResponseField>
+
+<RequestExample>
+```bash cURL
+curl -X POST https://api.canaryedge.com/v1/train \
+  -H "Content-Type: application/json" \
+  -H "Ocp-Apim-Subscription-Key: YOUR_API_KEY" \
+  -d '{
+    "machine_id": "pump-assembly-1",
+    "series": [
+      {"timestamp": "2026-01-01T00:00:00Z", "value": 10.5},
+      {"timestamp": "2026-01-01T01:00:00Z", "value": 11.2},
+      ...
+    ]
+  }'
+```
+</RequestExample>
+
+<ResponseExample>
+```json 200
+{
+  "machine_id": "pump-assembly-1",
+  "status": "success",
+  "metrics": {
+    "final_loss": 0.0012,
+    "epochs": 50
+  }
+}
+```
+</ResponseExample>
