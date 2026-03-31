@@ -107,9 +107,6 @@
       "linkedin": "https://linkedin.com/company/canaryedge"
     }
   },
-  "api": {
-    "baseUrl": "https://api.canaryedge.com"
-  },
   "feedback": {
     "thumbsRating": true
   }
