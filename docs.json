@@ -31,32 +31,32 @@
       {
         "group": "API Reference",
         "pages": [
-          "api-reference/introduction",
-          "api-reference/authentication"
+          "reference/introduction",
+          "reference/authentication"
         ]
       },
       {
         "group": "Azure-Compatible Endpoints",
         "pages": [
-          "api-reference/endpoint/detect",
-          "api-reference/endpoint/detect-last",
-          "api-reference/endpoint/detect-changepoint"
+          "reference/endpoint/detect",
+          "reference/endpoint/detect-last",
+          "reference/endpoint/detect-changepoint"
         ]
       },
       {
         "group": "Native Endpoints",
         "pages": [
-          "api-reference/endpoint/native-detect",
-          "api-reference/endpoint/baseline",
-          "api-reference/endpoint/status",
-          "api-reference/endpoint/machines",
-          "api-reference/endpoint/usage"
+          "reference/endpoint/native-detect",
+          "reference/endpoint/baseline",
+          "reference/endpoint/status",
+          "reference/endpoint/machines",
+          "reference/endpoint/usage"
         ]
       },
       {
         "group": "System",
         "pages": [
-          "api-reference/endpoint/health"
+          "reference/endpoint/health"
         ]
       }
     ],
