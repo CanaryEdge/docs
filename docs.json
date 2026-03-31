@@ -77,11 +77,6 @@
     "global": {
       "anchors": [
         {
-          "anchor": "API Status",
-          "href": "https://status.canaryedge.com",
-          "icon": "signal"
-        },
-        {
           "anchor": "GitHub",
           "href": "https://github.com/CanaryEdge",
           "icon": "github"
