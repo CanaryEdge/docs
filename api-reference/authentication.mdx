@@ -43,3 +43,36 @@ curl https://api.canaryedge.com/v1/detect \
 ```
 
 This is used internally by the Canary Edge dashboard.
+
+## AWS Marketplace Bridge
+
+Customers who subscribe to Canary Edge through [AWS Marketplace](https://aws.amazon.com/marketplace/) authenticate with the same API key headers described above. The difference is how the account is provisioned and how usage is billed.
+
+### Registration Flow
+
+When a customer subscribes via AWS Marketplace, AWS redirects them to the Canary Edge landing page with an `x-amzn-marketplace-token` query parameter. Canary resolves this token to an AWS customer identifier and provisions an organization and API key automatically.
+
+### Billing Dimensions
+
+AWS Marketplace usage is metered across three dimensions:
+
+| Dimension | Unit | Description |
+|-----------|------|-------------|
+| `batch_api_calls` | API calls | Calls to `entire/detect` and `changepoint/detect` |
+| `stream_api_calls` | API calls | Calls to `last/detect` |
+| `monitored_machines` | Machines | Active machines with baselines |
+
+Usage is reported hourly to the AWS Marketplace Metering API. The minimum billable unit is 1,000 API calls per reporting period.
+
+### Using Your API Key
+
+Once provisioned, AWS Marketplace customers use Canary Edge exactly like direct customers. The same endpoints and headers work:
+
+```bash
+curl https://api.canaryedge.com/anomalydetector/v1.1/timeseries/entire/detect \
+  -H "Content-Type: application/json" \
+  -H "Ocp-Apim-Subscription-Key: YOUR_API_KEY" \
+  -d '{"series": [...], "granularity": "hourly"}'
+```
+
+No AWS SDK or IAM credentials are needed for API calls. All authentication goes through the Canary Edge API key -- AWS is only involved for billing.
