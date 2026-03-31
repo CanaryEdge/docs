@@ -97,7 +97,7 @@ The native Canary detection endpoint extends the Azure-compatible response with 
 </ResponseField>
 
 <ResponseField name="engine" type="string">
-  Engine identifier (e.g., `LeWM-SIGReg`).
+  Engine identifier (e.g., `canary-v1`).
 </ResponseField>
 
 <ResponseField name="inference_time_ms" type="number">
@@ -148,8 +148,8 @@ curl -X POST https://api.canaryedge.com/v1/detect \
   "energies": [0.02, 0.03, 0.02, 0.02, 0.03, 0.02, 0.03, 0.02, 0.02, 0.02, 4.5, 0.03],
   "z_scores": [0.1, 0.3, 0.1, 0.1, 0.3, 0.1, 0.3, 0.1, 0.1, 0.1, 12.5, 0.3],
   "embeddings": null,
-  "model_version": "canary-lewm-v0.1",
-  "engine": "LeWM-SIGReg",
+  "model_version": "canary-v0.1",
+  "engine": "canary-v1",
   "inference_time_ms": 2.3
 }
 ```

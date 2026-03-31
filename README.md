@@ -1,6 +1,6 @@
 # Canary Edge Documentation
 
-API documentation for [Canary Edge](https://canaryedge.com) -- anomaly detection powered by Learned World Models.
+API documentation for [Canary Edge](https://canaryedge.com) -- state-of-the-art anomaly detection API.
 
 Published at [docs.canaryedge.com](https://docs.canaryedge.com) via Mintlify.
 
