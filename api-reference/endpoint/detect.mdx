@@ -1,37 +1,39 @@
 ---
 title: "Detect Anomalies (Entire Series)"
-api: "POST /v1/timeseries/entire/detect"
-description: "Analyze an entire time series for anomalies"
+api: "POST /anomalydetector/v1.1/timeseries/entire/detect"
+description: "Azure-compatible endpoint to analyze an entire time series for anomalies"
 ---
 
-Detects anomalies across all points in a time series. Best for batch analysis of historical data.
+Detects anomalies across all points in a time series. This endpoint is fully compatible with the Azure Anomaly Detector API (v1.0 and v1.1). Best for batch analysis of historical data.
+
+Both `/anomalydetector/v1.0/timeseries/entire/detect` and `/anomalydetector/v1.1/timeseries/entire/detect` are supported. Canary returns the `severity` field for both versions.
 
 <ParamField body="series" type="array" required>
-  Array of data points, each with `timestamp` (ISO 8601) and `value` (number). Minimum 12 points.
+  Array of data points, each with `timestamp` (ISO 8601) and `value` (number). Minimum 12 points, maximum 8640 points. Timestamps must be sorted ascending with no duplicates.
 </ParamField>
 
-<ParamField body="granularity" type="string" required>
-  Time interval between points. One of: `minutely`, `hourly`, `daily`, `weekly`, `monthly`.
+<ParamField body="granularity" type="string" default="none">
+  Time interval between points. One of: `yearly`, `monthly`, `weekly`, `daily`, `hourly`, `minutely`, `secondly`, `microsecond`, `none`.
 </ParamField>
 
-<ParamField body="sensitivity" type="integer" default="85">
-  Detection sensitivity from 0 (least sensitive) to 99 (most sensitive).
+<ParamField body="customInterval" type="integer" default={1}>
+  Multiplier for granularity.
 </ParamField>
 
-<ParamField body="machine_id" type="string">
-  Optional machine identifier. If a fine-tuned model exists for this ID, it will be used automatically.
+<ParamField body="period" type="integer" default={0}>
+  Seasonality period. Set to `0` for auto-detection, or provide a positive integer to force a specific period.
 </ParamField>
 
-<ResponseField name="isAnomaly" type="boolean[]">
-  Whether each point is an anomaly.
-</ResponseField>
+<ParamField body="maxAnomalyRatio" type="number" default={0.25}>
+  Maximum fraction of points that can be flagged as anomalies. Must be between 0 and 0.5 (exclusive).
+</ParamField>
 
-<ResponseField name="isPositiveAnomaly" type="boolean[]">
-  Whether each point is a positive (above expected) anomaly.
-</ResponseField>
+<ParamField body="sensitivity" type="integer" default={95}>
+  Detection sensitivity from 0 (least sensitive) to 99 (most sensitive). Higher values flag more anomalies.
+</ParamField>
 
-<ResponseField name="isNegativeAnomaly" type="boolean[]">
-  Whether each point is a negative (below expected) anomaly.
+<ResponseField name="period" type="integer">
+  Detected seasonality period (0 if none detected).
 </ResponseField>
 
 <ResponseField name="expectedValues" type="number[]">
@@ -46,38 +48,91 @@ Detects anomalies across all points in a time series. Best for batch analysis of
   Lower bound margin for each point.
 </ResponseField>
 
-<ResponseField name="period" type="integer">
-  Detected seasonality period (0 if none detected).
+<ResponseField name="isAnomaly" type="boolean[]">
+  Whether each point is an anomaly.
+</ResponseField>
+
+<ResponseField name="isNegativeAnomaly" type="boolean[]">
+  Whether each point is a negative (below expected) anomaly.
+</ResponseField>
+
+<ResponseField name="isPositiveAnomaly" type="boolean[]">
+  Whether each point is a positive (above expected) anomaly.
+</ResponseField>
+
+<ResponseField name="severity" type="number[]">
+  Severity score from 0.0 to 1.0 for each point.
 </ResponseField>
 
 <RequestExample>
 ```bash cURL
-curl -X POST https://api.canaryedge.com/v1/timeseries/entire/detect \
+curl -X POST https://api.canaryedge.com/anomalydetector/v1.1/timeseries/entire/detect \
   -H "Content-Type: application/json" \
   -H "Ocp-Apim-Subscription-Key: YOUR_API_KEY" \
   -d '{
     "series": [
-      {"timestamp": "2026-01-01T00:00:00Z", "value": 10.5},
-      {"timestamp": "2026-01-01T01:00:00Z", "value": 11.2},
-      {"timestamp": "2026-01-01T02:00:00Z", "value": 45.0},
-      {"timestamp": "2026-01-01T03:00:00Z", "value": 10.1}
+      {"timestamp": "2018-03-01T00:00:00Z", "value": 32858923},
+      {"timestamp": "2018-03-02T00:00:00Z", "value": 29615278},
+      {"timestamp": "2018-03-03T00:00:00Z", "value": 28988966},
+      {"timestamp": "2018-03-04T00:00:00Z", "value": 28943783},
+      {"timestamp": "2018-03-05T00:00:00Z", "value": 33521547},
+      {"timestamp": "2018-03-06T00:00:00Z", "value": 34127843},
+      {"timestamp": "2018-03-07T00:00:00Z", "value": 32497298},
+      {"timestamp": "2018-03-08T00:00:00Z", "value": 29615278},
+      {"timestamp": "2018-03-09T00:00:00Z", "value": 28988966},
+      {"timestamp": "2018-03-10T00:00:00Z", "value": 28943783},
+      {"timestamp": "2018-03-11T00:00:00Z", "value": 33521547},
+      {"timestamp": "2018-03-12T00:00:00Z", "value": 72000000}
     ],
-    "granularity": "hourly",
-    "sensitivity": 85
+    "granularity": "daily",
+    "sensitivity": 95
   }'
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    "https://api.canaryedge.com/anomalydetector/v1.1/timeseries/entire/detect",
+    headers={
+        "Content-Type": "application/json",
+        "Ocp-Apim-Subscription-Key": "YOUR_API_KEY",
+    },
+    json={
+        "series": [
+            {"timestamp": "2018-03-01T00:00:00Z", "value": 32858923},
+            {"timestamp": "2018-03-02T00:00:00Z", "value": 29615278},
+            {"timestamp": "2018-03-03T00:00:00Z", "value": 28988966},
+            {"timestamp": "2018-03-04T00:00:00Z", "value": 28943783},
+            {"timestamp": "2018-03-05T00:00:00Z", "value": 33521547},
+            {"timestamp": "2018-03-06T00:00:00Z", "value": 34127843},
+            {"timestamp": "2018-03-07T00:00:00Z", "value": 32497298},
+            {"timestamp": "2018-03-08T00:00:00Z", "value": 29615278},
+            {"timestamp": "2018-03-09T00:00:00Z", "value": 28988966},
+            {"timestamp": "2018-03-10T00:00:00Z", "value": 28943783},
+            {"timestamp": "2018-03-11T00:00:00Z", "value": 33521547},
+            {"timestamp": "2018-03-12T00:00:00Z", "value": 72000000},
+        ],
+        "granularity": "daily",
+        "sensitivity": 95,
+    },
+)
+
+print(response.json())
 ```
 </RequestExample>
 
 <ResponseExample>
 ```json 200
 {
-  "isAnomaly": [false, false, true, false],
-  "isPositiveAnomaly": [false, false, true, false],
-  "isNegativeAnomaly": [false, false, false, false],
-  "expectedValues": [10.5, 10.85, 10.67, 10.55],
-  "upperMargins": [2.1, 2.17, 2.13, 2.11],
-  "lowerMargins": [2.1, 2.17, 2.13, 2.11],
-  "period": 0
+  "period": 7,
+  "expectedValues": [32889953.0, 29604016.0, 28988966.0],
+  "upperMargins": [1644497.6, 1480200.8, 1449448.3],
+  "lowerMargins": [1644497.6, 1480200.8, 1449448.3],
+  "isAnomaly": [false, false, false, false, false, false, false, false, false, false, false, true],
+  "isNegativeAnomaly": [false, false, false, false, false, false, false, false, false, false, false, false],
+  "isPositiveAnomaly": [false, false, false, false, false, false, false, false, false, false, false, true],
+  "severity": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.72]
 }
 ```
 </ResponseExample>

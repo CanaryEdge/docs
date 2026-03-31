@@ -1,55 +1,43 @@
-# Mintlify Starter Kit
+# Canary Edge Documentation
 
-Use the starter kit to get your docs deployed and ready to customize.
+API documentation for [Canary Edge](https://canaryedge.com) -- anomaly detection powered by Learned World Models.
 
-Click the green **Use this template** button at the top of this repo to copy the Mintlify starter kit. The starter kit contains examples with
-
-- Guide pages
-- Navigation
-- Customizations
-- API reference pages
-- Use of popular components
-
-**[Follow the full quickstart guide](https://starter.mintlify.com/quickstart)**
-
-## AI-assisted writing
-
-Set up your AI coding tool to work with Mintlify:
-
-```bash
-npx skills add https://mintlify.com/docs
-```
-
-This command installs Mintlify's documentation skill for your configured AI tools like Claude Code, Cursor, Windsurf, and others. The skill includes component reference, writing standards, and workflow guidance.
-
-See the [AI tools guides](/ai-tools) for tool-specific setup.
+Published at [docs.canaryedge.com](https://docs.canaryedge.com) via Mintlify.
 
 ## Development
 
-Install the [Mintlify CLI](https://www.npmjs.com/package/mint) to preview your documentation changes locally. To install, use the following command:
+Install the [Mintlify CLI](https://www.npmjs.com/package/mint) to preview documentation changes locally:
 
-```
+```bash
 npm i -g mint
 ```
 
-Run the following command at the root of your documentation, where your `docs.json` is located:
+Run the development server:
 
-```
+```bash
 mint dev
 ```
 
 View your local preview at `http://localhost:3000`.
 
-## Publishing changes
+## Publishing
 
-Install our GitHub app from your [dashboard](https://dashboard.mintlify.com/settings/organization/github-app) to propagate changes from your repo to your deployment. Changes are deployed to production automatically after pushing to the default branch.
+Changes pushed to the `main` branch are automatically deployed to production via the Mintlify GitHub app.
 
-## Need help?
+## Structure
 
-### Troubleshooting
-
-- If your dev environment isn't running: Run `mint update` to ensure you have the most recent version of the CLI.
-- If a page loads as a 404: Make sure you are running in a folder with a valid `docs.json`.
-
-### Resources
-- [Mintlify documentation](https://mintlify.com/docs)
+- `docs.json` -- Mintlify configuration and navigation
+- `index.mdx` -- Landing page
+- `quickstart.mdx` -- Getting started guide
+- `concepts.mdx` -- Core concepts
+- `api-reference/` -- API endpoint documentation
+  - `endpoint/detect.mdx` -- Azure-compatible entire series detection
+  - `endpoint/detect-last.mdx` -- Azure-compatible last point detection
+  - `endpoint/detect-changepoint.mdx` -- Azure-compatible changepoint detection
+  - `endpoint/native-detect.mdx` -- Native detection with regime classification
+  - `endpoint/baseline.mdx` -- Baseline management
+  - `endpoint/status.mdx` -- Machine status
+  - `endpoint/machines.mdx` -- Machine listing and deletion
+  - `endpoint/usage.mdx` -- Usage statistics
+  - `endpoint/health.mdx` -- Health check
+- `guides/` -- Migration and advanced guides

@@ -1,0 +1,121 @@
+---
+title: "Baseline"
+api: "POST /v1/baseline"
+description: "Create or retrieve a healthy baseline for a machine"
+---
+
+## Create Baseline
+
+`POST /v1/baseline`
+
+Create or update a healthy baseline for a specific machine. This computes energy statistics from the provided time series and fine-tunes a per-machine predictor (~462K params, approximately 10-15 seconds on CPU).
+
+<ParamField body="machine_id" type="string" required>
+  Unique machine identifier within your organization.
+</ParamField>
+
+<ParamField body="series" type="array" required>
+  Array of **healthy operating** data points, each with `timestamp` (ISO 8601) and `value` (number). Minimum 100 points. Do not include known anomalies.
+</ParamField>
+
+<ParamField body="granularity" type="string" default="none">
+  Data frequency hint for model selection.
+</ParamField>
+
+<ParamField body="label" type="string">
+  Human-readable label for the baseline (e.g., "Normal operating conditions, January 2024").
+</ParamField>
+
+<ResponseField name="machine_id" type="string">
+  The machine identifier.
+</ResponseField>
+
+<ResponseField name="baseline_id" type="string">
+  Baseline identifier (format: `bl_` + machine_id).
+</ResponseField>
+
+<ResponseField name="created_at" type="string">
+  ISO 8601 creation timestamp.
+</ResponseField>
+
+<ResponseField name="stats" type="object">
+  Baseline energy statistics.
+  - `energy_mean` (number): Mean energy during healthy operation.
+  - `energy_std` (number): Standard deviation of healthy energy.
+  - `energy_p99` (number): 99th percentile of healthy energy.
+  - `num_windows` (integer): Number of sliding windows computed.
+  - `series_length` (integer): Length of the input series.
+</ResponseField>
+
+<ResponseField name="finetune_stats" type="object">
+  Fine-tuning results.
+  - `status` (string): `completed` or `skipped`.
+  - `final_loss` (number): Best predictor loss achieved.
+  - `epochs_run` (integer): Actual epochs trained.
+  - `epochs_max` (integer): Maximum allowed epochs.
+  - `early_stopped` (boolean): Whether early stopping triggered.
+  - `windows` (integer): Training windows used.
+  - `duration_seconds` (number): Fine-tuning wall time.
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  Baseline status (`active`).
+</ResponseField>
+
+<RequestExample>
+```bash Create Baseline
+curl -X POST https://api.canaryedge.com/v1/baseline \
+  -H "Content-Type: application/json" \
+  -H "X-Canary-Key: YOUR_API_KEY" \
+  -d '{
+    "machine_id": "pump-47",
+    "series": [
+      {"timestamp": "2024-01-01T00:00:00Z", "value": 1.0},
+      {"timestamp": "2024-01-01T00:01:00Z", "value": 1.02},
+      {"timestamp": "2024-01-01T00:02:00Z", "value": 0.98}
+    ],
+    "granularity": "minutely",
+    "label": "Normal operating conditions, January 2024"
+  }'
+```
+
+```bash Get Baseline
+curl "https://api.canaryedge.com/v1/baseline?machine_id=pump-47" \
+  -H "X-Canary-Key: YOUR_API_KEY"
+```
+</RequestExample>
+
+<ResponseExample>
+```json 200
+{
+  "machine_id": "pump-47",
+  "baseline_id": "bl_pump-47",
+  "created_at": "2026-03-30T12:00:00Z",
+  "stats": {
+    "energy_mean": 0.023,
+    "energy_std": 0.008,
+    "energy_p99": 0.051,
+    "num_windows": 1984,
+    "series_length": 2048
+  },
+  "finetune_stats": {
+    "status": "completed",
+    "final_loss": 0.000342,
+    "epochs_run": 35,
+    "epochs_max": 50,
+    "early_stopped": true,
+    "windows": 1984,
+    "duration_seconds": 12.3
+  },
+  "status": "active"
+}
+```
+</ResponseExample>
+
+---
+
+## Get Baseline
+
+`GET /v1/baseline?machine_id={machine_id}`
+
+Retrieve the current baseline for a machine. Returns the same response format as the create endpoint.
