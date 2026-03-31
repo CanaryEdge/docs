@@ -30,7 +30,7 @@ Changes pushed to the `main` branch are automatically deployed to production via
 - `index.mdx` -- Landing page
 - `quickstart.mdx` -- Getting started guide
 - `concepts.mdx` -- Core concepts
-- `api-reference/` -- API endpoint documentation
+- `reference/` -- API endpoint documentation
   - `endpoint/detect.mdx` -- Azure-compatible entire series detection
   - `endpoint/detect-last.mdx` -- Azure-compatible last point detection
   - `endpoint/detect-changepoint.mdx` -- Azure-compatible changepoint detection

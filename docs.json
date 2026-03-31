@@ -109,5 +109,15 @@
   },
   "feedback": {
     "thumbsRating": true
-  }
+  },
+  "redirects": [
+    {
+      "source": "/api-reference/:slug*",
+      "destination": "/reference/:slug*"
+    },
+    {
+      "source": "/api-reference",
+      "destination": "/reference/introduction"
+    }
+  ]
 }
