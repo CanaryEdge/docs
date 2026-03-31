@@ -3,26 +3,22 @@ title: "Webhooks"
 description: "Get notified when anomalies are detected"
 ---
 
-Configure webhooks to receive real-time notifications when Canary Edge detects anomalies during continuous monitoring.
+Configure webhooks to receive real-time notifications when Canary Edge detects anomalies.
 
-## Setup
+## Setup via Dashboard
 
-Register a webhook endpoint in your dashboard at [canaryedge.com/dashboard/webhooks](https://canaryedge.com/dashboard/webhooks), or via the API:
+1. Go to [canaryedge.com/dashboard/settings](https://canaryedge.com/dashboard/settings)
+2. Click the **Webhooks** tab
+3. Enter your webhook URL
+4. Select which events to receive:
+   - `anomaly.detected` — fired when an anomaly is flagged
+   - `regime.changed` — fired when a machine transitions between regimes (e.g., HEALTHY → ACTIVE)
+   - `baseline.created` — fired when a new baseline is set for a machine
+5. Click **Save**
 
-```bash
-curl -X POST https://api.canaryedge.com/v1/webhooks \
-  -H "Content-Type: application/json" \
-  -H "Ocp-Apim-Subscription-Key: YOUR_API_KEY" \
-  -d '{
-    "url": "https://your-app.com/webhooks/canary",
-    "events": ["anomaly.detected"],
-    "secret": "your-webhook-secret"
-  }'
-```
+## Expected Payload
 
-## Payload
-
-When an anomaly is detected, Canary Edge sends a POST request to your endpoint:
+When an event fires, Canary Edge sends a POST request to your endpoint:
 
 ```json
 {
@@ -30,11 +26,11 @@ When an anomaly is detected, Canary Edge sends a POST request to your endpoint:
   "timestamp": "2026-03-15T14:30:00Z",
   "data": {
     "machine_id": "pump-assembly-1",
+    "regime": "SHOCK",
+    "energy": 4.52,
+    "z_score": 12.5,
     "point_timestamp": "2026-03-15T14:30:00Z",
-    "value": 45.2,
-    "expected_value": 10.8,
-    "upper_margin": 2.16,
-    "severity": "high"
+    "value": 45.2
   }
 }
 ```
@@ -56,4 +52,12 @@ def verify_webhook(payload: bytes, signature: str, secret: str) -> bool:
 
 ## Retry Policy
 
-Failed deliveries are retried with exponential backoff: 1min, 5min, 30min, 2hr. After 4 failures, the webhook is disabled and you're notified via email.
+Failed deliveries are retried with exponential backoff: 1min, 5min, 30min, 2hr. After 4 failures, the webhook is disabled and you receive an email notification.
+
+## Email Notifications
+
+As an alternative to webhooks, you can enable email notifications in the **Notifications** tab of your dashboard settings. Options include:
+
+- Anomaly alerts (immediate)
+- Weekly summary reports
+- Usage warnings (approaching plan limits)

@@ -22,15 +22,11 @@
             ]
           },
           {
-            "group": "Migration Guides",
+            "group": "Guides",
             "pages": [
+              "guides/data-upload",
               "guides/azure-migration",
-              "guides/aws-migration"
-            ]
-          },
-          {
-            "group": "Advanced",
-            "pages": [
+              "guides/aws-migration",
               "guides/fine-tuning",
               "guides/webhooks"
             ]

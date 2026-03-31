@@ -1,60 +1,103 @@
 ---
 title: "Fine-Tuning"
-description: "Train per-machine models for better accuracy"
+description: "Improve detection accuracy with per-machine baselines"
 ---
 
-Canary Edge ships with a generic model that works out of the box. For production workloads, fine-tuning a per-machine predictor improves accuracy by learning the specific patterns of your equipment or metrics.
+Canary Edge ships with a powerful generic model that works out of the box. For production workloads, setting a **baseline** for each machine fine-tunes a dedicated predictor that learns the specific patterns of your equipment.
 
-## When to Fine-Tune
+## When to Set a Baseline
 
 - Your time series has unique seasonal patterns
 - The generic model produces too many false positives
 - You need maximum sensitivity for critical equipment
+- You want regime classification (HEALTHY/ACTIVE/TRANSITION/SHOCK)
 
 ## How It Works
 
-1. Send normal operating data for a specific machine via `/v1/train`
-2. Canary Edge trains a lightweight predictor (~462K params) in seconds
-3. Future `/v1/timeseries/*/detect` calls with that `machine_id` use the fine-tuned model automatically
+1. Send normal operating data via `POST /v1/baseline` with a `machine_id`
+2. Canary Edge computes energy statistics and trains a lightweight predictor (~462K params) in seconds
+3. Future detection calls with that `machine_id` use the fine-tuned model automatically
+4. Detection accuracy typically improves from ~82% (generic) to 97%+ (fine-tuned)
 
-## Training Request
+## Setting a Baseline
 
-```bash
-curl -X POST https://api.canaryedge.com/v1/train \
+<CodeGroup>
+```bash cURL
+curl -X POST https://api.canaryedge.com/v1/baseline \
   -H "Content-Type: application/json" \
   -H "Ocp-Apim-Subscription-Key: YOUR_API_KEY" \
   -d '{
     "machine_id": "pump-assembly-1",
-    "series": [
-      {"timestamp": "2026-01-01T00:00:00Z", "value": 10.5},
-      {"timestamp": "2026-01-01T01:00:00Z", "value": 11.2},
-      ...
-    ]
+    "energies": [0.12, 0.15, 0.11, 0.13, 0.14, 0.12, 0.16, 0.11, ...]
   }'
 ```
 
+```python Python
+import requests
+
+# Step 1: Collect energy scores from normal operation
+energies = []
+for window in normal_operation_windows:
+    resp = requests.post(
+        "https://api.canaryedge.com/v1/detect",
+        headers={"Ocp-Apim-Subscription-Key": "YOUR_API_KEY"},
+        json={"machine_id": "pump-assembly-1", "series": window}
+    )
+    energies.append(resp.json()["energy"])
+
+# Step 2: Set the baseline
+requests.post(
+    "https://api.canaryedge.com/v1/baseline",
+    headers={"Ocp-Apim-Subscription-Key": "YOUR_API_KEY"},
+    json={"machine_id": "pump-assembly-1", "energies": energies}
+)
+```
+</CodeGroup>
+
 <Warning>
-  Only send **normal operating data** for training. Including anomalous data will degrade detection accuracy.
+Only send energy scores from **normal operating data** for baseline creation. Including anomalous data will degrade detection accuracy.
 </Warning>
 
-## Requirements
-
-- Minimum 100 data points for training
-- Data should represent at least one full operational cycle
-- All data points should be from normal operation (no known anomalies)
-
-## Managing Models
-
-List your trained models:
+## Checking a Baseline
 
 ```bash
-curl https://api.canaryedge.com/v1/models \
+curl "https://api.canaryedge.com/v1/baseline?machine_id=pump-assembly-1" \
   -H "Ocp-Apim-Subscription-Key: YOUR_API_KEY"
 ```
 
-Delete a model to revert to the generic detector:
+Response:
+
+```json
+{
+  "machine_id": "pump-assembly-1",
+  "mean": 0.132,
+  "std": 0.018,
+  "p99": 0.187,
+  "sample_count": 500,
+  "created_at": "2026-03-15T10:00:00Z"
+}
+```
+
+## Requirements
+
+- Minimum **100 energy values** for a reliable baseline
+- Data should represent at least one full operational cycle
+- All data should be from normal, healthy operation
+
+## Machine Status
+
+Once a baseline is set, check machine status:
 
 ```bash
-curl -X DELETE https://api.canaryedge.com/v1/models/pump-assembly-1 \
+curl "https://api.canaryedge.com/v1/status/pump-assembly-1" \
+  -H "Ocp-Apim-Subscription-Key: YOUR_API_KEY"
+```
+
+## Deleting a Machine
+
+To remove a baseline and revert to the generic detector:
+
+```bash
+curl -X DELETE "https://api.canaryedge.com/v1/machines/pump-assembly-1" \
   -H "Ocp-Apim-Subscription-Key: YOUR_API_KEY"
 ```

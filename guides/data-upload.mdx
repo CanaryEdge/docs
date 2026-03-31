@@ -1,0 +1,254 @@
+---
+title: "Uploading Data"
+description: "Send time-series data from CSV, Excel, or any source"
+---
+
+Canary Edge accepts time-series data as JSON arrays via the API. This guide shows how to convert data from common formats.
+
+## Data Format
+
+Every request needs a `series` array of objects with `timestamp` and `value`:
+
+```json
+{
+  "series": [
+    {"timestamp": "2026-01-01T00:00:00Z", "value": 10.5},
+    {"timestamp": "2026-01-01T01:00:00Z", "value": 11.2},
+    {"timestamp": "2026-01-01T02:00:00Z", "value": 10.8}
+  ],
+  "granularity": "hourly",
+  "sensitivity": 85
+}
+```
+
+### Requirements
+
+| Field | Constraint |
+|-------|-----------|
+| `series` | 12 to 8,640 points |
+| `timestamp` | ISO 8601 format, sorted ascending, no duplicates |
+| `value` | Numeric (integer or float) |
+| `granularity` | `minutely`, `hourly`, `daily`, `weekly`, `monthly`, `yearly` |
+
+## From CSV
+
+<CodeGroup>
+```python Python
+import csv
+import json
+import requests
+
+# Read CSV with columns: timestamp, value
+series = []
+with open("sensor_data.csv") as f:
+    reader = csv.DictReader(f)
+    for row in reader:
+        series.append({
+            "timestamp": row["timestamp"],
+            "value": float(row["value"])
+        })
+
+# Send to Canary Edge
+response = requests.post(
+    "https://api.canaryedge.com/anomalydetector/v1.1/timeseries/entire/detect",
+    headers={
+        "Content-Type": "application/json",
+        "Ocp-Apim-Subscription-Key": "YOUR_API_KEY"
+    },
+    json={
+        "series": series,
+        "granularity": "minutely",
+        "sensitivity": 85
+    }
+)
+
+result = response.json()
+anomalies = [i for i, flag in enumerate(result["isAnomaly"]) if flag]
+print(f"Found {len(anomalies)} anomalies at indices: {anomalies}")
+```
+
+```javascript Node.js
+const fs = require("fs");
+const csv = require("csv-parse/sync");
+
+// Read CSV
+const data = fs.readFileSync("sensor_data.csv");
+const records = csv.parse(data, { columns: true });
+
+const series = records.map((row) => ({
+  timestamp: row.timestamp,
+  value: parseFloat(row.value),
+}));
+
+// Send to Canary Edge
+const response = await fetch(
+  "https://api.canaryedge.com/anomalydetector/v1.1/timeseries/entire/detect",
+  {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Ocp-Apim-Subscription-Key": "YOUR_API_KEY",
+    },
+    body: JSON.stringify({
+      series,
+      granularity: "minutely",
+      sensitivity: 85,
+    }),
+  }
+);
+
+const result = await response.json();
+console.log(result);
+```
+</CodeGroup>
+
+## From Excel
+
+<CodeGroup>
+```python Python (openpyxl)
+import openpyxl
+import requests
+
+wb = openpyxl.load_workbook("sensor_data.xlsx")
+ws = wb.active
+
+series = []
+for row in ws.iter_rows(min_row=2, values_only=True):
+    timestamp, value = row[0], row[1]
+    series.append({
+        "timestamp": timestamp.isoformat() + "Z" if hasattr(timestamp, "isoformat") else str(timestamp),
+        "value": float(value)
+    })
+
+response = requests.post(
+    "https://api.canaryedge.com/anomalydetector/v1.1/timeseries/entire/detect",
+    headers={
+        "Content-Type": "application/json",
+        "Ocp-Apim-Subscription-Key": "YOUR_API_KEY"
+    },
+    json={"series": series, "granularity": "hourly", "sensitivity": 85}
+)
+
+print(response.json())
+```
+
+```python Python (pandas)
+import pandas as pd
+import requests
+
+# Read Excel — works with .xlsx, .xls, .xlsb
+df = pd.read_excel("sensor_data.xlsx")
+
+# Assumes columns named 'timestamp' and 'value'
+series = [
+    {"timestamp": row["timestamp"].isoformat() + "Z", "value": float(row["value"])}
+    for _, row in df.iterrows()
+]
+
+response = requests.post(
+    "https://api.canaryedge.com/anomalydetector/v1.1/timeseries/entire/detect",
+    headers={
+        "Content-Type": "application/json",
+        "Ocp-Apim-Subscription-Key": "YOUR_API_KEY"
+    },
+    json={"series": series, "granularity": "hourly", "sensitivity": 85}
+)
+
+print(response.json())
+```
+</CodeGroup>
+
+## From Pandas DataFrame
+
+```python
+import pandas as pd
+import requests
+
+# Your existing DataFrame with datetime index and a 'value' column
+df = pd.read_csv("data.csv", parse_dates=["timestamp"], index_col="timestamp")
+
+series = [
+    {"timestamp": ts.isoformat() + "Z", "value": float(val)}
+    for ts, val in zip(df.index, df["value"])
+]
+
+# Limit to 8640 points (API maximum)
+if len(series) > 8640:
+    series = series[-8640:]
+
+response = requests.post(
+    "https://api.canaryedge.com/anomalydetector/v1.1/timeseries/entire/detect",
+    headers={
+        "Content-Type": "application/json",
+        "Ocp-Apim-Subscription-Key": "YOUR_API_KEY"
+    },
+    json={"series": series, "granularity": "minutely", "sensitivity": 85}
+)
+```
+
+## From Database (SQL)
+
+```python
+import psycopg2
+import requests
+
+conn = psycopg2.connect("postgresql://user:pass@host/db")
+cur = conn.cursor()
+cur.execute("""
+    SELECT timestamp, value
+    FROM sensor_readings
+    WHERE machine_id = 'pump-1'
+    ORDER BY timestamp DESC
+    LIMIT 8640
+""")
+
+series = [
+    {"timestamp": row[0].isoformat() + "Z", "value": float(row[1])}
+    for row in cur.fetchall()
+]
+series.reverse()  # API expects ascending order
+
+response = requests.post(
+    "https://api.canaryedge.com/anomalydetector/v1.1/timeseries/entire/detect",
+    headers={
+        "Content-Type": "application/json",
+        "Ocp-Apim-Subscription-Key": "YOUR_API_KEY"
+    },
+    json={"series": series, "granularity": "minutely", "sensitivity": 85}
+)
+```
+
+## Batch Processing
+
+For large datasets, split into chunks of up to 8,640 points:
+
+```python
+import requests
+
+def detect_in_chunks(series, chunk_size=8640, **kwargs):
+    all_results = []
+    for i in range(0, len(series), chunk_size):
+        chunk = series[i:i + chunk_size]
+        if len(chunk) < 12:
+            continue
+        resp = requests.post(
+            "https://api.canaryedge.com/anomalydetector/v1.1/timeseries/entire/detect",
+            headers={
+                "Content-Type": "application/json",
+                "Ocp-Apim-Subscription-Key": "YOUR_API_KEY"
+            },
+            json={"series": chunk, **kwargs}
+        )
+        all_results.append(resp.json())
+    return all_results
+```
+
+## Common Issues
+
+| Issue | Solution |
+|-------|---------|
+| `Series must contain at least 12 points` | Your data has fewer than 12 rows — check for empty/null filtering |
+| `Series timestamps must be sorted` | Sort your data by timestamp ascending before sending |
+| `Duplicate timestamps` | Remove duplicate timestamp rows from your dataset |
+| `Series exceeds maximum length` | Split into chunks of 8,640 or fewer points |
+| Excel dates showing as numbers | Use `pd.to_datetime()` or `openpyxl` to parse dates properly |
