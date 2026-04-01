@@ -1,13 +1,107 @@
 ---
 title: "Uploading Data"
-description: "Send time-series data from CSV, Excel, or any source"
+description: "Create baselines and run detection from CSV — via dashboard or API"
 ---
 
-Canary Edge accepts time-series data as JSON arrays via the API. This guide shows how to convert data from common formats.
+There are two ways to upload data to Canary Edge:
 
-## Data Format
+1. **Dashboard** -- upload a CSV file directly through the web UI
+2. **API** -- send JSON payloads programmatically
 
-Every request needs a `series` array of objects with `timestamp` and `value`:
+Both methods support baseline creation (training) and anomaly detection.
+
+## Create a Baseline via Dashboard
+
+A baseline teaches Canary Edge what "normal" looks like for your machine. To create one from the dashboard:
+
+1. Go to **Machines** in the sidebar and click **+ Add Machine**
+2. Choose **Univariate** (single sensor) or **Multivariate** (multiple correlated sensors)
+3. Enter a **Machine ID** (e.g. `pump-47-vibX`)
+4. Select the **Granularity** that matches your data sampling rate
+5. Upload a **CSV file** with your historical normal-operation data
+6. Set **Sensitivity** (0-99) -- higher values flag more anomalies
+7. Click **Create Baseline**
+
+### CSV format for baseline
+
+**Univariate** -- two columns with a header row:
+
+```csv
+timestamp,value
+2026-01-01T00:00:00Z,10.5
+2026-01-01T01:00:00Z,11.2
+2026-01-01T02:00:00Z,10.8
+```
+
+**Multivariate** -- first column is timestamp, remaining columns are channels:
+
+```csv
+timestamp,vibration_x,vibration_y,temperature
+2026-01-01T00:00:00Z,0.42,0.38,72.1
+2026-01-01T01:00:00Z,0.45,0.41,72.3
+2026-01-01T02:00:00Z,0.43,0.39,72.0
+```
+
+Channel names are automatically read from the column headers.
+
+<Note>
+Baseline creation takes up to 30 seconds. The model fine-tunes a predictor specifically for your machine's normal behavior patterns.
+</Note>
+
+## Run Detection via Dashboard
+
+Once a machine has a baseline, you can upload new data to check for anomalies:
+
+1. Go to the machine's detail page
+2. Click **Run Detection**
+3. Upload a CSV file with the same format as your baseline data (timestamp, value)
+4. Set **Sensitivity** and click **Detect Anomalies**
+
+The results show total points analyzed, anomaly count, and regime classification (HEALTHY, ACTIVE, TRANSITION, SHOCK) for each data point.
+
+## Create a Baseline via API
+
+```bash
+curl -X POST https://api.canaryedge.com/v1/baseline \
+  -H "Content-Type: application/json" \
+  -H "Ocp-Apim-Subscription-Key: YOUR_API_KEY" \
+  -d '{
+    "machine_id": "pump-47-vibX",
+    "series": [
+      {"timestamp": "2026-01-01T00:00:00Z", "value": 10.5},
+      {"timestamp": "2026-01-01T01:00:00Z", "value": 11.2},
+      ...
+    ],
+    "granularity": "minutely",
+    "sensitivity": 95
+  }'
+```
+
+The response includes baseline statistics and fine-tuning results:
+
+```json
+{
+  "machine_id": "pump-47-vibX",
+  "status": "created",
+  "stats": {
+    "num_windows": 45,
+    "series_length": 2048,
+    "energy_mean": 0.0012,
+    "energy_p99": 0.0089
+  },
+  "predictor_finetuning": {
+    "status": "completed",
+    "epochs_run": 23,
+    "final_loss": 0.000142,
+    "duration_seconds": 8.3,
+    "early_stopped": true
+  }
+}
+```
+
+## Run Detection via API
+
+Every detection request needs a `series` array of objects with `timestamp` and `value`:
 
 ```json
 {
@@ -21,7 +115,7 @@ Every request needs a `series` array of objects with `timestamp` and `value`:
 }
 ```
 
-### Requirements
+### API Constraints
 
 | Field | Constraint |
 |-------|-----------|
