@@ -68,7 +68,7 @@
         },
         {
           "anchor": "GitHub",
-          "href": "https://github.com/CanaryEdge",
+          "href": "https://github.com/CanaryEdge/docs",
           "icon": "github"
         }
       ]
@@ -102,7 +102,7 @@
   },
   "footer": {
     "socials": {
-      "github": "https://github.com/CanaryEdge",
+      "github": "https://github.com/CanaryEdge/docs",
       "linkedin": "https://linkedin.com/company/canaryedge"
     }
   },
