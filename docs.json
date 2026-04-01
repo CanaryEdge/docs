@@ -65,6 +65,11 @@
           "anchor": "API Status",
           "href": "https://canaryedge.com/status",
           "icon": "signal"
+        },
+        {
+          "anchor": "GitHub",
+          "href": "https://github.com/CanaryEdge",
+          "icon": "github"
         }
       ]
     }
@@ -97,6 +102,7 @@
   },
   "footer": {
     "socials": {
+      "github": "https://github.com/CanaryEdge",
       "linkedin": "https://linkedin.com/company/canaryedge"
     }
   },
